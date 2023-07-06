@@ -85,10 +85,12 @@ import re
 import struct
 import sys
 import tarfile
+import pathlib
 
 import numpy as np
 from six.moves import urllib
-import tensorflow as tf
+# import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 from tensorflow.python.framework import graph_util
 from tensorflow.python.framework import tensor_shape
@@ -130,11 +132,11 @@ def create_image_lists(image_dir, testing_percentage, validation_percentage):
     A dictionary containing an entry for each label subfolder, with images split
     into training, testing, and validation sets within each label.
   """
-  if not gfile.Exists(image_dir):
+  if not tf.gfile.Exists(image_dir):
     print("Image directory '" + image_dir + "' not found.")
     return None
   result = {}
-  sub_dirs = [x[0] for x in gfile.Walk(image_dir)]
+  sub_dirs = [x[0] for x in tf.gfile.Walk(image_dir)]
   # The root directory comes first, so skip it.
   is_root_dir = True
   for sub_dir in sub_dirs:
@@ -147,9 +149,11 @@ def create_image_lists(image_dir, testing_percentage, validation_percentage):
     if dir_name == image_dir:
       continue
     print("Looking for images in '" + dir_name + "'")
+    # if pathlib.Path(dir_name).is_dir():
+    #   create_image_lists(dir_name)
     for extension in extensions:
       file_glob = os.path.join(image_dir, dir_name, '*.' + extension)
-      file_list.extend(gfile.Glob(file_glob))
+      file_list.extend(tf.gfile.Glob(file_glob))
     if not file_list:
       print('No files found')
       continue
@@ -259,7 +263,7 @@ def create_inception_graph():
   with tf.Graph().as_default() as graph:
     model_filename = os.path.join(
         FLAGS.model_dir, 'classify_image_graph_def.pb')
-    with gfile.FastGFile(model_filename, 'rb') as f:
+    with tf.gfile.FastGFile(model_filename, 'rb') as f:
       graph_def = tf.GraphDef()
       graph_def.ParseFromString(f.read())
       bottleneck_tensor, jpeg_data_tensor, resized_input_tensor = (
@@ -366,9 +370,9 @@ def create_bottleneck_file(bottleneck_path, image_lists, label_name, index,
   print('Creating bottleneck at ' + bottleneck_path)
   image_path = get_image_path(image_lists, label_name, index,
                               image_dir, category)
-  if not gfile.Exists(image_path):
+  if not tf.gfile.Exists(image_path):
     tf.logging.fatal('File does not exist %s', image_path)
-  image_data = gfile.FastGFile(image_path, 'rb').read()
+  image_data = tf.gfile.FastGFile(image_path, 'rb').read()
   try:
     bottleneck_values = run_bottleneck_on_image(
         sess, image_data, jpeg_data_tensor, bottleneck_tensor)
@@ -575,9 +579,9 @@ def get_random_distorted_bottlenecks(
     image_index = random.randrange(MAX_NUM_IMAGES_PER_CLASS + 1)
     image_path = get_image_path(image_lists, label_name, image_index, image_dir,
                                 category)
-    if not gfile.Exists(image_path):
+    if not tf.gfile.Exists(image_path):
       tf.logging.fatal('File does not exist %s', image_path)
-    jpeg_data = gfile.FastGFile(image_path, 'rb').read()
+    jpeg_data = tf.gfile.FastGFile(image_path, 'rb').read()
     # Note that we materialize the distorted_image_data as a numpy array before
     # sending running inference on the image. This involves 2 memory copies and
     # might be optimized in other implementations.
@@ -942,9 +946,9 @@ def main(_):
     # constants.
     output_graph_def = graph_util.convert_variables_to_constants(
         sess, graph.as_graph_def(), [FLAGS.final_tensor_name])
-    with gfile.FastGFile(FLAGS.output_graph, 'wb') as f:
+    with tf.gfile.FastGFile(FLAGS.output_graph, 'wb') as f:
       f.write(output_graph_def.SerializeToString())
-    with gfile.FastGFile(FLAGS.output_labels, 'w') as f:
+    with tf.gfile.FastGFile(FLAGS.output_labels, 'w') as f:
       f.write('\n'.join(image_lists.keys()) + '\n')
 
 
@@ -977,7 +981,7 @@ if __name__ == '__main__':
   parser.add_argument(
       '--how_many_training_steps',
       type=int,
-      default=4000,
+      default=100,
       help='How many training steps to run before ending.'
   )
   parser.add_argument(
