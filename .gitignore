@@ -1,3 +1,13 @@
+# Directories
 training_dataset/
+build/
 inception/
-tf_files/
+dist/
+hooks/
+tf_files/training_summaries
+
+
+# Files
+*.spec
+*.log
+
