@@ -5,6 +5,7 @@ inception/
 dist/
 hooks/
 tf_files/training_summaries
+tf_files/bottlenecks
 
 
 # Files
