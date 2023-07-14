@@ -11,4 +11,5 @@ tf_files/bottlenecks
 # Files
 *.spec
 *.log
+*.jpg
 

@@ -25,8 +25,6 @@ if __name__ == "__main__":
     # angabe in console als argument nach dem aufruf
 
     if path.is_dir():
-        # print("Directory detected.Exiting...")
-        # sys.exit()
 
         # holt labels aus file in array
         label_lines = [

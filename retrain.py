@@ -144,6 +144,7 @@ def create_image_lists(image_dir, testing_percentage, validation_percentage):
         print("Image directory '" + image_dir + "' not found.")
         return None
     result = {}
+    # The classes for our classification
     sub_dirs = [x[0] for x in tf.gfile.Walk(image_dir)]
     # The root directory comes first, so skip it.
     is_root_dir = True
