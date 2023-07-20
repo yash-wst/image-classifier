@@ -1,0 +1,15 @@
+# Directories
+build/
+inception/
+dist/
+hooks/
+tf_files/training_summaries
+tf_files/bottlenecks
+
+
+# Files
+*.spec
+*.log
+*.jpg
+training_dataset/good/*.jpg
+training_dataset/bad/*.jpg
